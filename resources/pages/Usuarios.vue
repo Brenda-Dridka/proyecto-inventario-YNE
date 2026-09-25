@@ -1,83 +1,127 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
+import axios from "axios";
+
 import AppLayout from "../layouts/AppLayaut.vue";
 import UsuarioModal from "../components/usuarios/UsuarioModal.vue";
 
 const mostrarModal = ref(false);
 const busqueda = ref("");
 
-const usuarios = ref([
-    {
-        id: 1,
-        nombre: "Brenda",
-        apellido: "Ruiz",
-        username: "brenda",
-        rol: "Administrador",
-        estado: true,
-    },
-    {
-        id: 2,
-        nombre: "Juan",
-        apellido: "Pérez",
-        username: "juan",
-        rol: "Almacenista",
-        estado: true,
-    },
-    {
-        id: 3,
-        nombre: "María",
-        apellido: "García",
-        username: "maria",
-        rol: "Consulta",
-        estado: false,
-    },
-]);
+const usuarios = ref([]);
+const cargando = ref(false);
+const error = ref(null);
 
+/**
+ * Obtener usuarios desde Laravel
+ */
+const obtenerUsuarios = async () => {
+    cargando.value = true;
+    error.value = null;
+
+    try {
+        const response = await axios.get("/api/usuarios");
+
+        usuarios.value = response.data.data.map((usuario) => ({
+            ...usuario,
+
+            // Nombre del rol
+            rol: usuario.rol?.nombre ?? "Sin rol",
+
+            // Por ahora todos los usuarios de la tabla
+            // se consideran activos.
+            estado: true,
+        }));
+    } catch (err) {
+        console.error("Error al obtener usuarios:", err);
+
+        error.value = "No se pudieron cargar los usuarios.";
+    } finally {
+        cargando.value = false;
+    }
+};
+
+/**
+ * Filtrar usuarios
+ */
 const usuariosFiltrados = computed(() => {
-    const texto = busqueda.value.toLowerCase();
+    const texto = busqueda.value.toLowerCase().trim();
+
+    if (!texto) {
+        return usuarios.value;
+    }
 
     return usuarios.value.filter((usuario) => {
         return (
-            usuario.nombre.toLowerCase().includes(texto) ||
-            usuario.apellido.toLowerCase().includes(texto) ||
-            usuario.username.toLowerCase().includes(texto) ||
-            usuario.rol.toLowerCase().includes(texto)
+            usuario.nombre?.toLowerCase().includes(texto) ||
+            usuario.apellido?.toLowerCase().includes(texto) ||
+            usuario.username?.toLowerCase().includes(texto) ||
+            usuario.rol?.toLowerCase().includes(texto)
         );
     });
 });
 
+/**
+ * Abrir modal
+ */
 const abrirNuevoUsuario = () => {
     mostrarModal.value = true;
 };
 
+/**
+ * Cerrar modal
+ */
 const cerrarModal = () => {
     mostrarModal.value = false;
 };
 
+/**
+ * Guardar usuario
+ *
+ * Por ahora dejamos esta función preparada.
+ * Posteriormente conectaremos POST /api/usuarios.
+ */
 const guardarUsuario = (usuario) => {
-    usuarios.value.push({
-        id: usuarios.value.length + 1,
-        ...usuario,
-    });
+    console.log("Usuario recibido:", usuario);
 
     cerrarModal();
+
+    obtenerUsuarios();
 };
 
+/**
+ * Editar usuario
+ */
 const editarUsuario = (usuario) => {
     console.log("Editar usuario:", usuario);
 };
 
-const eliminarUsuario = (usuario) => {
+/**
+ * Eliminar usuario
+ */
+const eliminarUsuario = async (usuario) => {
     if (
-        confirm(
+        !confirm(
             `¿Deseas eliminar al usuario ${usuario.nombre} ${usuario.apellido}?`,
         )
     ) {
-        usuarios.value = usuarios.value.filter(
-            (item) => item.id !== usuario.id,
-        );
+        return;
     }
+
+    console.log("Eliminar usuario:", usuario);
+
+    // Posteriormente:
+    // await axios.delete(`/api/usuarios/${usuario.id}`);
+
+    // obtenerUsuarios();
 };
+
+/**
+ * Cargar usuarios al entrar a la página
+ */
+onMounted(() => {
+    obtenerUsuarios();
+});
 </script>
 
 <template>
@@ -87,14 +131,6 @@ const eliminarUsuario = (usuario) => {
             <div
                 class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center"
             >
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-800">Usuarios</h1>
-
-                    <p class="mt-1 text-sm text-gray-500">
-                        Administra los usuarios y empleados del sistema.
-                    </p>
-                </div>
-
                 <button
                     @click="abrirNuevoUsuario"
                     class="rounded-xl bg-gradient-to-r from-[#659bda] to-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
@@ -117,7 +153,8 @@ const eliminarUsuario = (usuario) => {
                         </h2>
 
                         <p class="mt-1 text-xs text-gray-400">
-                            {{ usuariosFiltrados.length }} usuarios registrados
+                            {{ usuariosFiltrados.length }}
+                            usuarios registrados
                         </p>
                     </div>
 
@@ -138,6 +175,21 @@ const eliminarUsuario = (usuario) => {
                     </div>
                 </div>
 
+                <!-- Error -->
+                <div
+                    v-if="error"
+                    class="m-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600"
+                >
+                    {{ error }}
+
+                    <button
+                        @click="obtenerUsuarios"
+                        class="ml-2 font-semibold underline"
+                    >
+                        Reintentar
+                    </button>
+                </div>
+
                 <!-- Tabla -->
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
@@ -152,7 +204,7 @@ const eliminarUsuario = (usuario) => {
                                 <th
                                     class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-gray-400"
                                 >
-                                    Usuario
+                                    No.Empleado
                                 </th>
 
                                 <th
@@ -176,8 +228,23 @@ const eliminarUsuario = (usuario) => {
                         </thead>
 
                         <tbody class="divide-y divide-gray-100">
+                            <!-- Cargando -->
+                            <tr v-if="cargando">
+                                <td colspan="5" class="px-6 py-12 text-center">
+                                    <div
+                                        class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500"
+                                    ></div>
+
+                                    <p class="mt-3 text-sm text-gray-400">
+                                        Cargando usuarios...
+                                    </p>
+                                </td>
+                            </tr>
+
+                            <!-- Usuarios -->
                             <tr
                                 v-for="usuario in usuariosFiltrados"
+                                v-else
                                 :key="usuario.id"
                                 class="transition hover:bg-blue-50/40"
                             >
@@ -187,7 +254,7 @@ const eliminarUsuario = (usuario) => {
                                         <div
                                             class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#659bda] to-violet-500 text-sm font-bold text-white"
                                         >
-                                            {{ usuario.nombre.charAt(0) }}
+                                            {{ usuario.nombre?.charAt(0) }}
                                         </div>
 
                                         <div>
@@ -208,7 +275,7 @@ const eliminarUsuario = (usuario) => {
                                 <!-- Usuario -->
                                 <td class="px-6 py-4">
                                     <span class="text-sm text-gray-600">
-                                        {{ usuario.username }}
+                                        {{ usuario.no_empleado }}
                                     </span>
                                 </td>
 
@@ -230,6 +297,7 @@ const eliminarUsuario = (usuario) => {
                                         <span
                                             class="h-1.5 w-1.5 rounded-full bg-green-500"
                                         ></span>
+
                                         Activo
                                     </span>
 
@@ -240,6 +308,7 @@ const eliminarUsuario = (usuario) => {
                                         <span
                                             class="h-1.5 w-1.5 rounded-full bg-gray-400"
                                         ></span>
+
                                         Inactivo
                                     </span>
                                 </td>
@@ -267,7 +336,11 @@ const eliminarUsuario = (usuario) => {
                             </tr>
 
                             <!-- Sin resultados -->
-                            <tr v-if="usuariosFiltrados.length === 0">
+                            <tr
+                                v-if="
+                                    !cargando && usuariosFiltrados.length === 0
+                                "
+                            >
                                 <td colspan="5" class="px-6 py-12 text-center">
                                     <div class="text-4xl">🔎</div>
 

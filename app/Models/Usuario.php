@@ -14,7 +14,7 @@ class Usuario extends Model
         'nombre',
         'apellido',
         'id_rol',
-        'username',
+        'no_empleado',
         'password',
     ];
 

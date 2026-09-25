@@ -100,13 +100,13 @@ const guardar = () => {
                 <!-- Usuario -->
                 <div>
                     <label class="mb-2 block text-sm font-medium text-gray-600">
-                        Nombre de usuario
+                        Número de Empleado
                     </label>
 
                     <input
-                        v-model="form.username"
+                        v-model="form.no_empleado"
                         type="text"
-                        placeholder="Ej. bruiz"
+                        placeholder="Ej. 12345"
                         class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
                     />
                 </div>
