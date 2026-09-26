@@ -1,25 +1,30 @@
 <script setup>
 import { ref } from "vue";
 
+const props = defineProps({
+    roles: {
+        type: Array,
+        default: () => [],
+    },
+});
+
 const emit = defineEmits(["close", "save"]);
 
 const form = ref({
     nombre: "",
     apellido: "",
-    username: "",
+    no_empleado: "",
     password: "",
-    rol: "",
+    id_rol: "",
 });
-
-const roles = ["Administrador", "Almacenista", "Consulta"];
 
 const guardar = () => {
     if (
         !form.value.nombre ||
         !form.value.apellido ||
-        !form.value.username ||
+        !form.value.no_empleado ||
         !form.value.password ||
-        !form.value.rol
+        !form.value.id_rol
     ) {
         alert("Completa todos los campos.");
         return;
@@ -27,7 +32,6 @@ const guardar = () => {
 
     emit("save", {
         ...form.value,
-        estado: true,
     });
 };
 </script>
@@ -54,7 +58,7 @@ const guardar = () => {
                 </div>
 
                 <button
-                    @click="$emit('close')"
+                    @click="emit('close')"
                     class="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                 >
                     ✕
@@ -97,10 +101,10 @@ const guardar = () => {
                     </div>
                 </div>
 
-                <!-- Usuario -->
+                <!-- Número de empleado -->
                 <div>
                     <label class="mb-2 block text-sm font-medium text-gray-600">
-                        Número de Empleado
+                        Número de empleado
                     </label>
 
                     <input
@@ -132,13 +136,17 @@ const guardar = () => {
                     </label>
 
                     <select
-                        v-model="form.rol"
+                        v-model="form.id_rol"
                         class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
                     >
                         <option value="">Selecciona un rol</option>
 
-                        <option v-for="rol in roles" :key="rol" :value="rol">
-                            {{ rol }}
+                        <option
+                            v-for="rol in props.roles"
+                            :key="rol.id"
+                            :value="rol.id"
+                        >
+                            {{ rol.nombre }}
                         </option>
                     </select>
                 </div>
@@ -149,7 +157,7 @@ const guardar = () => {
                 >
                     <button
                         type="button"
-                        @click="$emit('close')"
+                        @click="emit('close')"
                         class="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
                     >
                         Cancelar

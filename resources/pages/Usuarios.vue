@@ -11,6 +11,17 @@ const busqueda = ref("");
 const usuarios = ref([]);
 const cargando = ref(false);
 const error = ref(null);
+const roles = ref([]);
+
+const obtenerRoles = async () => {
+    try {
+        const response = await axios.get("/api/roles");
+
+        roles.value = response.data.data;
+    } catch (err) {
+        console.error("Error al obtener roles:", err);
+    }
+};
 
 /**
  * Obtener usuarios desde Laravel
@@ -81,12 +92,32 @@ const cerrarModal = () => {
  * Por ahora dejamos esta función preparada.
  * Posteriormente conectaremos POST /api/usuarios.
  */
-const guardarUsuario = (usuario) => {
-    console.log("Usuario recibido:", usuario);
+const guardarUsuario = async (usuario) => {
+    try {
+        const response = await axios.post("/api/usuarios", usuario);
 
-    cerrarModal();
+        console.log(response.data);
 
-    obtenerUsuarios();
+        alert("Empleado creado correctamente.");
+
+        cerrarModal();
+
+        await obtenerUsuarios();
+    } catch (err) {
+        console.error("Error al crear empleado:", err);
+
+        if (err.response?.status === 422) {
+            const errores = err.response.data.errors;
+
+            const primerError = Object.values(errores)[0]?.[0];
+
+            alert(primerError || "Verifica los datos ingresados.");
+
+            return;
+        }
+
+        alert("Ocurrió un error al crear el empleado.");
+    }
 };
 
 /**
@@ -121,6 +152,7 @@ const eliminarUsuario = async (usuario) => {
  */
 onMounted(() => {
     obtenerUsuarios();
+    obtenerRoles();
 });
 </script>
 
@@ -362,6 +394,7 @@ onMounted(() => {
         <!-- Modal -->
         <UsuarioModal
             v-if="mostrarModal"
+            :roles="roles"
             @close="cerrarModal"
             @save="guardarUsuario"
         />
