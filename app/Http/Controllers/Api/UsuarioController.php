@@ -167,4 +167,42 @@ class UsuarioController
             'data' => $usuario,
         ]);
     }
+        /**
+     * Eliminar usuario
+     */
+public function destroy(int $id): JsonResponse
+{
+    $usuario = Usuario::find($id);
+
+    if (!$usuario) {
+        return response()->json([
+            'success' => false,
+            'message' => 'El usuario no existe.',
+        ], 404);
+    }
+
+    $usuario->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Empleado eliminado correctamente.',
+    ]);
+}
+
+public function show(int $id): JsonResponse
+{
+    $usuario = Usuario::with('rol')->find($id);
+
+    if (!$usuario) {
+        return response()->json([
+            'success' => false,
+            'message' => 'El usuario no existe.',
+        ], 404);
+    }
+
+    return response()->json([
+        'success' => true,
+        'data' => $usuario,
+    ]);
+}
 }

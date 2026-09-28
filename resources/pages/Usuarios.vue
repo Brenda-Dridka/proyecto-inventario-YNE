@@ -5,6 +5,7 @@ import AppLayout from "../layouts/AppLayaut.vue";
 import UsuarioModal from "../components/usuarios/UsuarioModal.vue";
 import { toast } from "vue3-toastify";
 import UsuarioEditModal from "../components/usuarios/UsuarioEditModal.vue";
+import UsuarioDetailModal from "../components/usuarios/UsuarioDetailModal.vue";
 
 const mostrarModal = ref(false);
 const busqueda = ref("");
@@ -15,6 +16,12 @@ const error = ref(null);
 const roles = ref([]);
 const mostrarEditarModal = ref(false);
 const usuarioSeleccionado = ref(null);
+const mostrarDialogEliminar = ref(false);
+const usuarioAEliminar = ref(null);
+const eliminando = ref(false);
+const mostrarDetalleModal = ref(false);
+const usuarioDetalle = ref(null);
+const cargandoDetalle = ref(false);
 
 const obtenerRoles = async () => {
     try {
@@ -180,23 +187,77 @@ const actualizarUsuario = async (usuario) => {
 /**
  * Eliminar usuario
  */
-const eliminarUsuario = async (usuario) => {
-    if (
-        !confirm(
-            `¿Deseas eliminar al usuario ${usuario.nombre} ${usuario.apellido}?`,
-        )
-    ) {
-        return;
-    }
-
-    console.log("Eliminar usuario:", usuario);
-
-    // Posteriormente:
-    // await axios.delete(`/api/usuarios/${usuario.id}`);
-
-    // obtenerUsuarios();
+const eliminarUsuario = (usuario) => {
+    usuarioAEliminar.value = usuario;
+    mostrarDialogEliminar.value = true;
 };
 
+const cerrarDialogEliminar = () => {
+    if (eliminando.value) return;
+
+    mostrarDialogEliminar.value = false;
+    usuarioAEliminar.value = null;
+};
+
+const confirmarEliminarUsuario = async () => {
+    if (!usuarioAEliminar.value) return;
+
+    eliminando.value = true;
+
+    try {
+        const id = usuarioAEliminar.value.id;
+
+        await axios.delete(`/api/usuarios/${id}`);
+
+        // Cerrar inmediatamente el dialog
+        mostrarDialogEliminar.value = false;
+        usuarioAEliminar.value = null;
+
+        toast.success("Empleado eliminado correctamente.");
+
+        await obtenerUsuarios();
+    } catch (err) {
+        console.error("Error al eliminar empleado:", err);
+
+        if (err.response?.status === 404) {
+            toast.error("El empleado no existe.");
+            return;
+        }
+
+        toast.error("Ocurrió un error al eliminar el empleado.");
+    } finally {
+        eliminando.value = false;
+    }
+};
+/**
+ * Ver detalle de usuario
+ */
+const verDetalleUsuario = async (usuario) => {
+    cargandoDetalle.value = true;
+
+    try {
+        const response = await axios.get(`/api/usuarios/${usuario.id}`);
+
+        usuarioDetalle.value = response.data.data;
+        mostrarDetalleModal.value = true;
+    } catch (err) {
+        console.error("Error al obtener detalle del empleado:", err);
+
+        if (err.response?.status === 404) {
+            toast.error("El empleado no existe.");
+            return;
+        }
+
+        toast.error("No se pudo obtener la información del empleado.");
+    } finally {
+        cargandoDetalle.value = false;
+    }
+};
+
+const cerrarDetalleModal = () => {
+    mostrarDetalleModal.value = false;
+    usuarioDetalle.value = null;
+};
 /**
  * Cargar usuarios al entrar a la página
  */
@@ -396,6 +457,16 @@ onMounted(() => {
                                 <!-- Acciones -->
                                 <td class="px-6 py-4">
                                     <div class="flex justify-end gap-2">
+                                        <!-- Ver detalle -->
+                                        <button
+                                            @click="verDetalleUsuario(usuario)"
+                                            class="rounded-lg p-2 text-violet-500 transition hover:bg-violet-50"
+                                            title="Ver detalle"
+                                        >
+                                            👁️
+                                        </button>
+
+                                        <!-- Editar -->
                                         <button
                                             @click="editarUsuario(usuario)"
                                             class="rounded-lg p-2 text-blue-500 transition hover:bg-blue-50"
@@ -404,10 +475,11 @@ onMounted(() => {
                                             ✏️
                                         </button>
 
+                                        <!-- Eliminar -->
                                         <button
                                             @click="eliminarUsuario(usuario)"
                                             class="rounded-lg p-2 text-red-500 transition hover:bg-red-50"
-                                            title="Eliminar"
+                                            title="Eliminar empleado"
                                         >
                                             🗑️
                                         </button>
@@ -455,5 +527,86 @@ onMounted(() => {
             @close="cerrarEditarModal"
             @save="actualizarUsuario"
         />
+        <!-- Modal detalle usuario -->
+        <UsuarioDetailModal
+            v-if="mostrarDetalleModal && usuarioDetalle"
+            :usuario="usuarioDetalle"
+            @close="cerrarDetalleModal"
+        />
     </AppLayout>
+    <!-- Dialog confirmar eliminación -->
+    <div
+        v-if="mostrarDialogEliminar && usuarioAEliminar"
+        class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
+    >
+        <div
+            class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+        >
+            <!-- Encabezado -->
+            <div class="flex items-center gap-4 px-6 pt-6">
+                <div
+                    class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-100"
+                >
+                    <span class="text-xl">🗑️</span>
+                </div>
+
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800">
+                        Eliminar empleado
+                    </h2>
+
+                    <p class="mt-1 text-sm text-gray-400">
+                        Esta acción no se puede deshacer
+                    </p>
+                </div>
+            </div>
+
+            <!-- Contenido -->
+            <div class="px-6 py-5">
+                <p class="text-sm leading-6 text-gray-600">
+                    ¿Estás seguro de que deseas eliminar definitivamente a
+                    <span class="font-semibold text-gray-800">
+                        {{ usuarioAEliminar.nombre }}
+                        {{ usuarioAEliminar.apellido }}
+                    </span>
+                    ?
+                </p>
+
+                <div
+                    class="mt-4 rounded-xl border border-red-100 bg-red-50 p-4"
+                >
+                    <p class="text-xs leading-5 text-red-600">
+                        ⚠️ El empleado será eliminado permanentemente del
+                        sistema. No podrás recuperar sus datos después de esta
+                        acción.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div
+                class="flex justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4"
+            >
+                <button
+                    type="button"
+                    @click="cerrarDialogEliminar"
+                    :disabled="eliminando"
+                    class="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="button"
+                    @click="confirmarEliminarUsuario"
+                    :disabled="eliminando"
+                    class="rounded-xl bg-red-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                    <span v-if="eliminando"> Eliminando... </span>
+
+                    <span v-else> Sí, eliminar </span>
+                </button>
+            </div>
+        </div>
+    </div>
 </template>
