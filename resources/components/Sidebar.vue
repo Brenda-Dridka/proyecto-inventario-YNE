@@ -16,7 +16,7 @@ const route = useRoute();
 const menuItems = [
     {
         name: "Dashboard",
-        route: "/dashboard",
+        route: "/",
         icon: "dashboard",
     },
     {
