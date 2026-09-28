@@ -1,5 +1,5 @@
 <script setup>
-import Dashboard from "../pages/Dashboard.vue";
+import "vue3-toastify/dist/index.css";
 </script>
 
 <template>

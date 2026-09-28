@@ -1,9 +1,9 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
-
 import AppLayout from "../layouts/AppLayaut.vue";
 import UsuarioModal from "../components/usuarios/UsuarioModal.vue";
+import { toast } from "vue3-toastify";
 
 const mostrarModal = ref(false);
 const busqueda = ref("");
@@ -88,9 +88,7 @@ const cerrarModal = () => {
 
 /**
  * Guardar usuario
- *
- * Por ahora dejamos esta función preparada.
- * Posteriormente conectaremos POST /api/usuarios.
+ 
  */
 const guardarUsuario = async (usuario) => {
     try {
@@ -98,7 +96,7 @@ const guardarUsuario = async (usuario) => {
 
         console.log(response.data);
 
-        alert("Empleado creado correctamente.");
+        toast.success("Empleado creado correctamente.");
 
         cerrarModal();
 
@@ -111,15 +109,14 @@ const guardarUsuario = async (usuario) => {
 
             const primerError = Object.values(errores)[0]?.[0];
 
-            alert(primerError || "Verifica los datos ingresados.");
+            toast.error(primerError || "Verifica los datos ingresados.");
 
             return;
         }
 
-        alert("Ocurrió un error al crear el empleado.");
+        toast.error("Ocurrió un error al crear el empleado.");
     }
 };
-
 /**
  * Editar usuario
  */
