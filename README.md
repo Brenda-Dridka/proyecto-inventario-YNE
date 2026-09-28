@@ -56,13 +56,8 @@ La aplicación utiliza Laravel como backend y API, mientras que Vue 3 se utiliza
 
 ## 🔐 Roles y permisos
 
-- Creación de roles.
-- Edición de roles.
-- Eliminación de roles.
-- Creación de permisos.
 - Asignación de permisos a roles.
 - Relación entre usuarios y roles.
-- Control de acceso por permisos.
 
 ## 📦 Productos
 
@@ -72,9 +67,6 @@ La aplicación utiliza Laravel como backend y API, mientras que Vue 3 se utiliza
 - Eliminación de productos.
 - Búsqueda de productos.
 - Control de cantidades.
-- Control de stock.
-- Ubicación de productos.
-- Alertas de inventario.
 
 ## 📊 Dashboard
 
@@ -289,8 +281,7 @@ Desde MySQL:
 
 ```sql
 CREATE DATABASE inventario
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_unicode_ci;
+
 ```
 
 ---
@@ -659,76 +650,6 @@ Ejemplo:
 
 ---
 
-# 🎭 API de roles
-
-## Obtener roles
-
-```http
-GET /api/roles
-```
-
-## Crear rol
-
-```http
-POST /api/roles
-```
-
-## Actualizar rol
-
-```http
-PUT /api/roles/{id}
-```
-
-## Eliminar rol
-
-```http
-DELETE /api/roles/{id}
-```
-
----
-
-# 🔒 Seguridad
-
-El proyecto implementa diferentes medidas para proteger la información.
-
-## Contraseñas
-
-Las contraseñas no deben almacenarse directamente.
-
-Se utiliza:
-
-```php
-Hash::make($password)
-```
-
-Laravel almacena un hash de la contraseña.
-
----
-
-## Variables de entorno
-
-El archivo:
-
-```text
-.env
-```
-
-no debe subirse al repositorio.
-
-El repositorio debe incluir:
-
-```text
-.env.example
-```
-
-pero no:
-
-```text
-.env
-```
-
----
-
 # 🚫 Archivos que NO deben subirse a Git
 
 El `.gitignore` debe evitar subir:
@@ -782,24 +703,6 @@ composer dump-autoload
 
 ---
 
-# 🧪 Pruebas
-
-Para ejecutar las pruebas:
-
-```bash
-php artisan test
-```
-
-También puede utilizarse:
-
-```bash
-composer test
-```
-
-si el script correspondiente está configurado.
-
----
-
 # 🏗 Compilar frontend para producción
 
 Para generar los archivos optimizados:
@@ -809,36 +712,6 @@ npm run build
 ```
 
 Esto genera los archivos compilados para producción.
-
----
-
-# 🚀 Instalación automática
-
-El `composer.json` contiene un script `setup`.
-
-Después de clonar el proyecto, puede ejecutarse:
-
-```bash
-composer run setup
-```
-
-El proceso realiza:
-
-```text
-composer install
-        ↓
-Crear .env
-        ↓
-Generar APP_KEY
-        ↓
-Migrar base de datos
-        ↓
-npm install
-        ↓
-npm run build
-```
-
-Antes de utilizarlo en un ambiente nuevo, es recomendable revisar la configuración de la base de datos.
 
 ---
 
@@ -916,111 +789,6 @@ npm run build
 
 ---
 
-# 🌿 Flujo de trabajo con Git
-
-Se recomienda utilizar ramas para organizar el desarrollo.
-
-## Rama principal
-
-```text
-main
-```
-
-## Desarrollo
-
-```text
-develop
-```
-
-## Nuevas características
-
-```text
-feature/nombre-funcionalidad
-```
-
-Ejemplos:
-
-```bash
-git checkout -b feature/crud-productos
-```
-
-```bash
-git checkout -b feature/roles-permisos
-```
-
-```bash
-git checkout -b feature/login
-```
-
----
-
-# 📝 Commits
-
-Se recomienda utilizar commits descriptivos.
-
-Ejemplos:
-
-```bash
-git add .
-git commit -m "feat: agregar CRUD de usuarios"
-```
-
-```bash
-git commit -m "feat: agregar modulo de productos"
-```
-
-```bash
-git commit -m "feat: implementar roles y permisos"
-```
-
-```bash
-git commit -m "fix: corregir validacion de usuarios"
-```
-
-```bash
-git commit -m "style: mejorar diseño de tabla de usuarios"
-```
-
-```bash
-git commit -m "refactor: reorganizar controlador de usuarios"
-```
-
----
-
-# 📤 Subir cambios a GitHub
-
-Verificar el estado:
-
-```bash
-git status
-```
-
-Agregar archivos:
-
-```bash
-git add .
-```
-
-Crear commit:
-
-```bash
-git commit -m "feat: implementar gestion de usuarios"
-```
-
-Subir cambios:
-
-```bash
-git push origin main
-```
-
-Si se está trabajando con una rama:
-
-```bash
-git push origin feature/crud-productos
-```
-
----
-
 # 🔎 Verificar rutas Laravel
 
 Para revisar las rutas registradas:
@@ -1062,147 +830,6 @@ Antes de ejecutar el proyecto:
 
 ---
 
-# 📌 Solución de problemas comunes
-
-## Error: `vendor/autoload.php` no existe
-
-Ejecutar:
-
-```bash
-composer install
-```
-
----
-
-## Error: `APP_KEY` no está configurada
-
-Ejecutar:
-
-```bash
-php artisan key:generate
-```
-
----
-
-## Error de conexión a MySQL
-
-Revisar:
-
-```env
-DB_HOST
-DB_PORT
-DB_DATABASE
-DB_USERNAME
-DB_PASSWORD
-```
-
-Después:
-
-```bash
-php artisan config:clear
-```
-
----
-
-## Error con `node_modules`
-
-Eliminar:
-
-```text
-node_modules
-```
-
-y ejecutar:
-
-```bash
-npm install
-```
-
----
-
-## Error de Vite
-
-Ejecutar:
-
-```bash
-npm install
-```
-
-y posteriormente:
-
-```bash
-npm run dev
-```
-
----
-
-## Error de caché de Laravel
-
-Ejecutar:
-
-```bash
-php artisan optimize:clear
-```
-
----
-
-# 🌎 Producción
-
-Antes de desplegar el proyecto en producción:
-
-```bash
-composer install --optimize-autoloader --no-dev
-```
-
-Instalar dependencias frontend:
-
-```bash
-npm install
-```
-
-Compilar:
-
-```bash
-npm run build
-```
-
-Configurar:
-
-```env
-APP_ENV=production
-APP_DEBUG=false
-```
-
-Generar la clave:
-
-```bash
-php artisan key:generate
-```
-
-Ejecutar migraciones:
-
-```bash
-php artisan migrate --force
-```
-
-Optimizar Laravel:
-
-```bash
-php artisan optimize
-```
-
-> Las variables de entorno, credenciales de base de datos y claves privadas deben configurarse directamente en el servidor y nunca almacenarse en Git.
-
----
-
-# 📄 Licencia
-
-Este proyecto utiliza Laravel, cuyo framework se distribuye bajo licencia MIT.
-
-La licencia específica del proyecto debe definirse de acuerdo con las condiciones de distribución establecidas por el propietario del proyecto.
-
----
-
 # 👩‍💻 Autor
 
 **Brenda Ruiz**
@@ -1224,31 +851,3 @@ Proyecto desarrollado como sistema de gestión y almacenamiento de productos par
 - Diseño de interfaces administrativas.
 
 ---
-
-# 📌 Estado del proyecto
-
-**En desarrollo**
-
-Módulos principales:
-
-- [x] Configuración inicial Laravel
-- [x] Integración Vue
-- [x] Vite
-- [x] Tailwind CSS
-- [x] Vue Router
-- [x] Dashboard
-- [x] Usuarios
-- [x] Roles
-- [x] Permisos
-- [x] API de usuarios
-- [x] Creación de empleados
-- [ ] Edición de empleados
-- [ ] Eliminación de empleados
-- [ ] Login completo
-- [ ] Middleware de autenticación
-- [ ] Middleware de permisos
-- [ ] CRUD completo de productos
-- [ ] Control de inventario
-- [ ] Alertas de stock
-- [ ] Reportes
-- [ ] Despliegue a producción
