@@ -5,13 +5,6 @@ import AppLayout from "../layouts/AppLayaut.vue";
 <template>
     <AppLayout>
         <div class="space-y-6">
-            <!-- Encabezado -->
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
-
-                <p class="mt-1 text-gray-500">Resumen general del sistema.</p>
-            </div>
-
             <!-- Cards -->
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
                 <!-- Usuarios -->

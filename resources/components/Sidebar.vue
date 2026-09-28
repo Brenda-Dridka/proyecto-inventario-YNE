@@ -2,6 +2,15 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 
+defineProps({
+    open: {
+        type: Boolean,
+        default: false,
+    },
+});
+
+const emit = defineEmits(["close"]);
+
 const route = useRoute();
 
 const menuItems = [
@@ -28,25 +37,67 @@ const menuItems = [
 ];
 
 const activeMenu = computed(() => route.path);
+
+const seleccionarMenu = () => {
+    // Solo cerramos en móvil
+    if (window.innerWidth < 1024) {
+        emit("close");
+    }
+};
 </script>
 
 <template>
+    <!-- Fondo oscuro para móvil -->
+    <div
+        v-if="open"
+        class="fixed inset-0 z-40 bg-black/40 lg:hidden"
+        @click="emit('close')"
+    ></div>
+
+    <!-- Sidebar -->
     <aside
-        class="fixed left-0 top-0 z-40 hidden h-screen w-64 border-r border-gray-200 bg-white shadow-sm lg:block"
+        class="fixed left-0 top-0 z-50 h-screen w-64 border-r border-gray-200 bg-white shadow-sm transition-transform duration-300 lg:z-40 lg:block lg:translate-x-0"
+        :class="open ? 'translate-x-0' : '-translate-x-full'"
     >
         <!-- Logo -->
-        <div class="flex h-20 items-center border-b border-gray-100 px-6">
-            <div
-                class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#73a2d1] to-[#8b7bc7] text-xl font-bold text-white shadow-md"
+        <div
+            class="flex h-20 items-center justify-between border-b border-gray-100 px-6"
+        >
+            <div class="flex items-center">
+                <div
+                    class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#73a2d1] to-[#8b7bc7] text-xl font-bold text-white shadow-md"
+                >
+                    S
+                </div>
+
+                <div class="ml-3">
+                    <h1 class="text-lg font-bold text-gray-800">Inventario</h1>
+
+                    <p class="text-xs text-gray-500">Administración</p>
+                </div>
+            </div>
+
+            <!-- Botón cerrar móvil -->
+            <button
+                class="rounded-lg p-2 text-gray-800 hover:bg-gray-100 lg:hidden"
+                @click="emit('close')"
+                aria-label="Cerrar menú"
             >
-                S
-            </div>
-
-            <div class="ml-3">
-                <h1 class="text-lg font-bold text-gray-800">Inventario</h1>
-
-                <p class="text-xs text-gray-400">Administración</p>
-            </div>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    class="h-6 w-6"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M6 18L18 6M6 6l12 12"
+                    />
+                </svg>
+            </button>
         </div>
 
         <!-- Menú -->
@@ -55,11 +106,12 @@ const activeMenu = computed(() => route.path);
                 v-for="item in menuItems"
                 :key="item.route"
                 :to="item.route"
+                @click="seleccionarMenu"
                 class="group relative flex items-center rounded-xl px-4 py-3 transition-all duration-200"
                 :class="
                     activeMenu === item.route
-                        ? 'bg-gradient-to-r from-[#73a2d1] to-[#a9c5e5] text-white shadow-sm'
-                        : 'text-gray-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-white hover:text-[#2b609e]'
+                        ? 'bg-gradient-to-r from-[#2685e4] to-[#a3c9f3] text-white shadow-sm'
+                        : 'text-gray-800 hover:bg-gradient-to-r hover:from-blue-50 hover:to-white hover:text-[#2b609e]'
                 "
             >
                 <!-- Icono -->
@@ -68,7 +120,7 @@ const activeMenu = computed(() => route.path);
                     :class="
                         activeMenu === item.route
                             ? 'bg-white/20 text-white'
-                            : 'bg-gray-100 text-gray-500 group-hover:bg-blue-100 group-hover:text-[#2b609e]'
+                            : 'bg-gray-100 text-gray-800 group-hover:bg-blue-100 group-hover:text-[#2b609e]'
                     "
                 >
                     <!-- Dashboard -->
