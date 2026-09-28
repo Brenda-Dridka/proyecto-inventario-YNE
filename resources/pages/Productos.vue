@@ -5,6 +5,7 @@ import axios from "axios";
 import AppLayout from "../layouts/AppLayaut.vue";
 import ProductoFormModal from "../components/productos/ProductoFormModal.vue";
 import ProductoDetalleModal from "../components/productos/ProductoDetalleModal.vue";
+import ProductoEliminarModal from "../components/productos/ProductoEliminarModal.vue";
 
 import { toast } from "vue3-toastify";
 
@@ -29,6 +30,9 @@ const categoriaFiltro = ref("");
 
 const mostrarDetalle = ref(false);
 const productoDetalle = ref(null);
+
+const mostrarEliminar = ref(false);
+const productoEliminar = ref(null);
 
 /*
 |--------------------------------------------------------------------------
@@ -249,27 +253,43 @@ const guardarProducto = async (datos) => {
 | ELIMINAR PRODUCTO
 |--------------------------------------------------------------------------
 */
+const solicitarEliminarProducto = (producto) => {
+    if (eliminando.value) {
+        return;
+    }
 
-const eliminarProducto = async (producto) => {
-    const confirmar = window.confirm(
-        `¿Estás seguro de eliminar el producto "${producto.articulo}"?
+    productoEliminar.value = producto;
+    mostrarEliminar.value = true;
+};
 
-Esta acción no se puede deshacer.`,
-    );
+const cerrarEliminar = () => {
+    if (eliminando.value) {
+        return;
+    }
 
-    if (!confirmar) {
+    mostrarEliminar.value = false;
+    productoEliminar.value = null;
+};
+
+const eliminarProducto = async () => {
+    if (!productoEliminar.value || eliminando.value) {
         return;
     }
 
     eliminando.value = true;
 
     try {
-        const response = await axios.delete(`/api/productos/${producto.id}`);
+        const response = await axios.delete(
+            `/api/productos/${productoEliminar.value.id}`,
+        );
 
         if (response.data.success) {
             toast.success(
                 response.data.message || "Producto eliminado correctamente.",
             );
+
+            mostrarEliminar.value = false;
+            productoEliminar.value = null;
 
             await obtenerProductos();
         } else {
@@ -758,7 +778,11 @@ onMounted(async () => {
 
                                         <button
                                             type="button"
-                                            @click="eliminarProducto(producto)"
+                                            @click="
+                                                solicitarEliminarProducto(
+                                                    producto,
+                                                )
+                                            "
                                             :disabled="eliminando"
                                             class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-600 transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500/30"
                                             title="Eliminar producto"
@@ -855,6 +879,17 @@ onMounted(async () => {
             :mostrar="mostrarDetalle"
             :producto="productoDetalle"
             @cerrar="cerrarDetalle"
+        />
+
+        <!-- =========================================================
+             MODAL ELIMINAR PRODUCTO
+        ========================================================== -->
+        <ProductoEliminarModal
+            :mostrar="mostrarEliminar"
+            :producto="productoEliminar"
+            :eliminando="eliminando"
+            @cerrar="cerrarEliminar"
+            @confirmar="eliminarProducto"
         />
     </AppLayout>
 </template>
