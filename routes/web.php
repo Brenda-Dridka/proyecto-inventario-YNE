@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\RolController;
 
 Route::get('/api/usuarios', [UsuarioController::class, 'index']);
 Route::post('/api/usuarios', [UsuarioController::class, 'store']);
-//Route::put('/api/usuarios/{id}', [UsuarioController::class, 'update']);
+Route::put('/api/usuarios/{id}', [UsuarioController::class, 'update']);
 //Route::delete('/api/usuarios/{id}', [UsuarioController::class, 'destroy']);
 
 Route::get('/api/roles', [RolController::class, 'index']);

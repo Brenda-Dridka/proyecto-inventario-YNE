@@ -4,6 +4,7 @@ import axios from "axios";
 import AppLayout from "../layouts/AppLayaut.vue";
 import UsuarioModal from "../components/usuarios/UsuarioModal.vue";
 import { toast } from "vue3-toastify";
+import UsuarioEditModal from "../components/usuarios/UsuarioEditModal.vue";
 
 const mostrarModal = ref(false);
 const busqueda = ref("");
@@ -12,6 +13,8 @@ const usuarios = ref([]);
 const cargando = ref(false);
 const error = ref(null);
 const roles = ref([]);
+const mostrarEditarModal = ref(false);
+const usuarioSeleccionado = ref(null);
 
 const obtenerRoles = async () => {
     try {
@@ -39,13 +42,11 @@ const obtenerUsuarios = async () => {
             // Nombre del rol
             rol: usuario.rol?.nombre ?? "Sin rol",
 
-            // Por ahora todos los usuarios de la tabla
-            // se consideran activos.
-            estado: true,
+            // 1 = Activo, 0 = Inactivo
+            estado: Number(usuario.activo) === 1,
         }));
     } catch (err) {
         console.error("Error al obtener usuarios:", err);
-
         error.value = "No se pudieron cargar los usuarios.";
     } finally {
         cargando.value = false;
@@ -121,9 +122,61 @@ const guardarUsuario = async (usuario) => {
  * Editar usuario
  */
 const editarUsuario = (usuario) => {
-    console.log("Editar usuario:", usuario);
+    usuarioSeleccionado.value = usuario;
+    mostrarEditarModal.value = true;
 };
 
+const cerrarEditarModal = () => {
+    mostrarEditarModal.value = false;
+    usuarioSeleccionado.value = null;
+};
+
+const actualizarUsuario = async (usuario) => {
+    try {
+        const datos = {
+            nombre: usuario.nombre,
+            apellido: usuario.apellido,
+            no_empleado: usuario.no_empleado,
+            id_rol: usuario.id_rol,
+            activo: usuario.activo ? 1 : 0,
+        };
+
+        // Solo enviar password si escribió una nueva
+        if (usuario.password?.trim()) {
+            datos.password = usuario.password;
+        }
+
+        const response = await axios.put(`/api/usuarios/${usuario.id}`, datos);
+
+        console.log(response.data);
+
+        toast.success("Empleado actualizado correctamente.");
+
+        cerrarEditarModal();
+
+        await obtenerUsuarios();
+    } catch (err) {
+        console.error("Error al actualizar empleado:", err);
+
+        if (err.response?.status === 422) {
+            const errores = err.response.data.errors;
+
+            const primerError = Object.values(errores)[0]?.[0];
+
+            toast.error(primerError || "Verifica los datos ingresados.");
+
+            return;
+        }
+
+        if (err.response?.status === 404) {
+            toast.error("El empleado no existe.");
+
+            return;
+        }
+
+        toast.error("Ocurrió un error al actualizar el empleado.");
+    }
+};
 /**
  * Eliminar usuario
  */
@@ -162,7 +215,7 @@ onMounted(() => {
             >
                 <button
                     @click="abrirNuevoUsuario"
-                    class="rounded-xl bg-gradient-to-r from-[#659bda] to-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
+                    class="rounded-xl bg-gradient-to-r from-[#2c7edd] to-[#4f38c5] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
                 >
                     + Nuevo empleado
                 </button>
@@ -281,7 +334,7 @@ onMounted(() => {
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#659bda] to-violet-500 text-sm font-bold text-white"
+                                            class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#2c7edd] to-violet-500 text-sm font-bold text-white"
                                         >
                                             {{ usuario.nombre?.charAt(0) }}
                                         </div>
@@ -326,7 +379,6 @@ onMounted(() => {
                                         <span
                                             class="h-1.5 w-1.5 rounded-full bg-green-500"
                                         ></span>
-
                                         Activo
                                     </span>
 
@@ -337,7 +389,6 @@ onMounted(() => {
                                         <span
                                             class="h-1.5 w-1.5 rounded-full bg-gray-400"
                                         ></span>
-
                                         Inactivo
                                     </span>
                                 </td>
@@ -388,12 +439,21 @@ onMounted(() => {
             </div>
         </div>
 
-        <!-- Modal -->
+        <!-- Modal nuevo usuario -->
         <UsuarioModal
             v-if="mostrarModal"
             :roles="roles"
             @close="cerrarModal"
             @save="guardarUsuario"
+        />
+
+        <!-- Modal editar usuario -->
+        <UsuarioEditModal
+            v-if="mostrarEditarModal && usuarioSeleccionado"
+            :usuario="usuarioSeleccionado"
+            :roles="roles"
+            @close="cerrarEditarModal"
+            @save="actualizarUsuario"
         />
     </AppLayout>
 </template>

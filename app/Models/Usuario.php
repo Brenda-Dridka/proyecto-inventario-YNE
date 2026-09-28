@@ -16,6 +16,7 @@ class Usuario extends Model
         'id_rol',
         'no_empleado',
         'password',
+        'activo',
     ];
 
     protected $hidden = [

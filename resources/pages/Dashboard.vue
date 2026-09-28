@@ -50,7 +50,7 @@ import AppLayout from "../layouts/AppLayaut.vue";
                         </div>
                     </div>
 
-                    <p class="mt-4 text-sm text-violet-600">18 nuevos</p>
+                    <p class="mt-4 text-sm text-[#2c7edd]">18 nuevos</p>
                 </div>
 
                 <!-- Inventario -->

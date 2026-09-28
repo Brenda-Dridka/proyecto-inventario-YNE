@@ -165,7 +165,7 @@ const guardar = () => {
 
                     <button
                         type="submit"
-                        class="rounded-xl bg-gradient-to-r from-[#659bda] to-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md"
+                        class="rounded-xl bg-gradient-to-r from-[#2c7edd] to-[#4f38c5] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md"
                     >
                         Guardar empleado
                     </button>

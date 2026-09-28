@@ -117,7 +117,7 @@ const guardarPermisos = () => {
 
                 <button
                     @click="mostrarModal = true"
-                    class="rounded-xl bg-gradient-to-r from-[#659bda] to-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
+                    class="rounded-xl bg-gradient-to-r from-[#2c7edd] to-[#4f38c5] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
                 >
                     + Nuevo rol
                 </button>
@@ -198,7 +198,7 @@ const guardarPermisos = () => {
 
                         <button
                             @click="guardarPermisos"
-                            class="rounded-xl bg-gradient-to-r from-[#659bda] to-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md"
+                            class="rounded-xl bg-gradient-to-r from-[#2c7edd] to-[#4f38c5] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md"
                         >
                             Guardar cambios
                         </button>
@@ -298,7 +298,7 @@ const guardarPermisos = () => {
 
                         <button
                             type="submit"
-                            class="rounded-xl bg-gradient-to-r from-[#659bda] to-violet-600 px-5 py-2.5 text-sm font-semibold text-white"
+                            class="rounded-xl bg-gradient-to-r from-[#2c7edd] to-[#4f38c5] px-5 py-2.5 text-sm font-semibold text-white"
                         >
                             Crear rol
                         </button>
