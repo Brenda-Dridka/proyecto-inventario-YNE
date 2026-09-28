@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import { toast } from "vue3-toastify";
 
 defineProps({
     sidebarOpen: {
@@ -12,6 +13,7 @@ defineProps({
 const emit = defineEmits(["toggle-sidebar"]);
 
 const route = useRoute();
+const router = useRouter();
 
 const pageTitles = {
     dashboard: {
@@ -43,6 +45,26 @@ const currentPage = computed(() => {
         }
     );
 });
+
+/*
+|--------------------------------------------------------------------------
+| CERRAR SESIÓN
+|--------------------------------------------------------------------------
+*/
+
+const cerrarSesion = () => {
+    // Eliminar usuario del localStorage
+    localStorage.removeItem("usuario");
+
+    // Mensaje
+    toast.success("Sesión cerrada correctamente.");
+
+    // Regresar al login
+    // replace evita regresar con el botón "Atrás"
+    router.replace({
+        name: "login",
+    });
+};
 </script>
 
 <template>
@@ -100,6 +122,40 @@ const currentPage = computed(() => {
                 <p class="text-sm text-gray-500">
                     {{ currentPage.subtitle }}
                 </p>
+            </div>
+
+            <!-- Cerrar sesión -->
+            <div class="ml-auto">
+                <button
+                    @click="cerrarSesion"
+                    type="button"
+                    class="flex items-center gap-2 rounded-xl border border-red-200 px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 hover:text-red-700"
+                    title="Cerrar sesión"
+                >
+                    <!-- Icono salir -->
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="2"
+                        stroke="currentColor"
+                        class="h-5 w-5"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15"
+                        />
+
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M18 12H9m9 0l-3-3m3 3l-3 3"
+                        />
+                    </svg>
+
+                    <span class="hidden sm:inline"> Cerrar sesión </span>
+                </button>
             </div>
         </div>
     </header>

@@ -115,12 +115,12 @@ const guardarPermisos = () => {
                     </p>
                 </div>
 
-                <button
+                <!--   <button
                     @click="mostrarModal = true"
                     class="rounded-xl bg-gradient-to-r from-[#2c7edd] to-[#4f38c5] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
                 >
                     + Nuevo rol
-                </button>
+                </button> -->
             </div>
 
             <!-- Contenedor -->
@@ -196,12 +196,12 @@ const guardarPermisos = () => {
                             </p>
                         </div>
 
-                        <button
+                        <!--  <button
                             @click="guardarPermisos"
                             class="rounded-xl bg-gradient-to-r from-[#2c7edd] to-[#4f38c5] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md"
                         >
                             Guardar cambios
-                        </button>
+                        </button> -->
                     </div>
 
                     <div class="space-y-6 p-6">
